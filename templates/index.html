@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Music Practice Exercise Generator</title>
+    <link rel="icon" type="image/png" href="/static/guitar2.png" />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="chat-container">
+      <div class="chat-header">
+        <img src="/static/guitar2.png" alt="Logo" class="logo" />
+        <h1 style="font-family: cursive">Music Practice Exercise Generator</h1>
+      </div>
+      <class class="chat-box" id="chat-box">
+        <div class="chat-message bot-message">
+          <p style="font-family: cursive">
+            Welcome to the Music Practice Exercise Generator! 🎵
+          </p>
+          <p>
+            Whether you're a beginner or an advanced musician, we're here to
+            help you improve your skills with personalized practice exercises.
+          </p>
+          <p>
+            Let's get started by selecting your skill level and focus area
+            below!
+          </p>
+        </div>
+      </class>
+      <form id="exerciseForm" method="POST" action="/generate">
+        <div class="form-group">
+          <label for="skill_level">Skill Level:</label>
+          <select id="skill_level" name="skill_level" required>
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="num_exercises">Number of Exercises:</label>
+          <input
+            type="number"
+            id="num_exercises"
+            name="num_exercises"
+            value="3"
+            min="1"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="focus_area">Focus Area:</label>
+          <input
+            type="text"
+            id="focus_area"
+            name="focus_area"
+            value="scales and technique"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="tone">Tone:</label>
+          <select id="tone" name="tone" required>
+            <option value="encouraging">Encouraging</option>
+            <option value="professional">Professional</option>
+            <option value="casual">Casual</option>
+          </select>
+        </div>
+        <button type="submit" style="font-family: cursive">
+          Generate Exercises
+        </button>
+      </form>
+      <!-- Output container for generated exercises -->
+      <div id="output-container"></div>
+    </div>
+
+    <script>
+      document
+        .getElementById("exerciseForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+
+          const formData = new FormData(event.target);
+
+          try {
+            const response = await fetch("/generate", {
+              method: "POST",
+              body: formData,
+            });
+
+            if (response.ok) {
+              const result = await response.json();
+              console.log("Response from server:", result); // Log the response
+
+              const outputContainer =
+                document.getElementById("output-container");
+
+              // Clean up the output by removing unwanted characters
+              const cleanedOutput = result.generated_exercises
+                .replace(/\*\*/g, "") // Remove double asterisks
+                .replace(/#/g, "") // Remove hashes
+                .replace(/\*/g, ""); // Remove single asterisks
+
+              // Break the output into smaller paragraphs
+              const formattedOutput = cleanedOutput
+                .split("\n\n") // Split by double newlines for paragraphs
+                .map((paragraph) => `<p>${paragraph}</p>`)
+                .join("");
+
+              outputContainer.innerHTML = `
+                <div class="chat-message bot-message">
+                  ${formattedOutput}
+                </div>
+              `;
+              outputContainer.scrollIntoView({ behavior: "smooth" }); // Scroll to the output
+            } else {
+              alert("Failed to generate exercises. Please try again.");
+            }
+          } catch (error) {
+            console.error("Error:", error);
+            alert("An error occurred. Please check the console for details.");
+          }
+        });
+    </script>
+  </body>
+</html>
