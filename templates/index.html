@@ -9,11 +9,36 @@
   </head>
   <body>
     <div class="chat-container">
+      <!-- Adding images to the header with inline CSS -->
+      <div
+        style="
+          display: flex;
+          justify-content: center;
+          gap: 10px;
+          margin-top: 10px;
+        "
+      >
+        <img
+          src="/static/IVIS_logo.png"
+          alt="Image 1"
+          style="width: 100px; height: auto"
+        />
+        <img
+          src="/static/NIE_University.png"
+          alt="Image 2"
+          style="width: 100px; height: auto"
+        />
+        <img
+          src="/static/PULSE LOGO.png"
+          alt="Image 3"
+          style="width: 100px; height: auto"
+        />
+      </div>
       <div class="chat-header">
         <img src="/static/guitar2.png" alt="Logo" class="logo" />
         <h1 style="font-family: cursive">Music Practice Exercise Generator</h1>
       </div>
-      <class class="chat-box" id="chat-box">
+      <div class="chat-box" id="chat-box">
         <div class="chat-message bot-message">
           <p style="font-family: cursive">
             Welcome to the Music Practice Exercise Generator! 🎵
@@ -27,7 +52,7 @@
             below!
           </p>
         </div>
-      </class>
+      </div>
       <form id="exerciseForm" method="POST" action="/generate">
         <div class="form-group">
           <label for="skill_level">Skill Level:</label>
@@ -73,6 +98,20 @@
       <!-- Output container for generated exercises -->
       <div id="output-container"></div>
     </div>
+    <footer
+      style="
+        text-align: center;
+        padding: 10px;
+        background-color: #f1f1f1;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+      "
+    >
+      <p style="margin: 0; font-size: 14px; color: #333">
+        Powered by <strong>IVISLABS</strong>
+      </p>
+    </footer>
 
     <script>
       document

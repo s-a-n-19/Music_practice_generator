@@ -5,8 +5,14 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse
 import httpx
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import json
+import logging
+import traceback
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Set up templates and static files
 templates = Jinja2Templates(directory="templates")
@@ -16,7 +22,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # Configuration for open-webui API
 WEBUI_ENABLED = True  # Set to use open-webui API
 WEBUI_BASE_URL = "https://chat.ivislabs.in/api"
-API_KEY = "sk-2e7ff0df727b4f08a97b86e1e78df6b9"  # Replace with your actual API key if needed
+API_KEY = "sk-2e7ff0df727b4f08a97b86e1e78df6b9"  # Use environment variable for API key
 DEFAULT_MODEL = "gemma2:2b"  # Update to one of the available models
 
 # Fallback to local Ollama API if needed
@@ -37,7 +43,7 @@ Number of Exercises: {num_exercises}
 
 class GenerationRequest(BaseModel):
     skill_level: str
-    num_exercises: int = 3
+    num_exercises: int = Field(gt=0, default=3)
     focus_area: str = "scales and technique"
     tone: Optional[str] = "encouraging"
 
@@ -104,12 +110,12 @@ async def generate_exercises(
                         if generated_text:
                             return JSONResponse(content={"generated_exercises": generated_text})
             except Exception as e:
-                print(f"Open-webui API attempt failed: {str(e)}")
+                logger.error(f"Open-webui API attempt failed: {str(e)}")
 
         # Fallback to direct Ollama API if enabled and web UI failed
         if OLLAMA_ENABLED:
             try:
-                print("Falling back to direct Ollama API")
+                logger.info("Falling back to direct Ollama API")
                 async with httpx.AsyncClient() as client:
                     response = await client.post(
                         f"{OLLAMA_API_URL}/generate",
@@ -128,7 +134,7 @@ async def generate_exercises(
                     else:
                         raise HTTPException(status_code=500, detail="Failed to generate content from Ollama API")
             except Exception as e:
-                print(f"Ollama API attempt failed: {str(e)}")
+                logger.error(f"Ollama API attempt failed: {str(e)}")
 
         # If we get here, both attempts failed
         hardcoded_response = """
@@ -155,9 +161,8 @@ async def generate_exercises(
         return JSONResponse(content={"generated_exercises": hardcoded_response})
 
     except Exception as e:
-        import traceback
-        print(f"Error generating music exercises: {str(e)}")
-        print(traceback.format_exc())
+        logger.error(f"Error generating music exercises: {str(e)}")
+        logger.error(traceback.format_exc())
         raise HTTPException(status_code=500, detail=f"Error generating music exercises: {str(e)}")
 
 if __name__ == "__main__":
